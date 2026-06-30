@@ -10,6 +10,8 @@ import { loadState, saveState, defaultState, todayKey, daysBetween, resetState }
 import {
   initBilling,
   getEntitlement,
+  getOfferings as getOfferingsFlow,
+  purchase as purchaseFlow,
   presentPaywall as presentPaywallFlow,
   restore as restorePurchasesFlow,
 } from '../monetization/purchases';
@@ -99,6 +101,18 @@ export function AppProvider({ children }) {
     return result;
   };
 
+  // Buy a plan directly (used by our custom hard paywall). Calls RevenueCat's
+  // purchasePackage under the hood and persists the unlock on success.
+  const buy = async (plan) => {
+    const result = await purchaseFlow(plan);
+    if (result.entitled) update({ entitled: true });
+    return result;
+  };
+
+  // Fetch live, localized offerings for the paywall (price strings, trials).
+  // Always resolves — falls back to bundled display data on any failure.
+  const loadOfferings = () => getOfferingsFlow();
+
   // "Restore Purchases" — required by App Store review. Persists on success.
   const restorePurchases = async () => {
     const result = await restorePurchasesFlow();
@@ -126,6 +140,8 @@ export function AppProvider({ children }) {
       finishOnboarding,
       setEntitled,
       setNowPlaying,
+      buy,
+      loadOfferings,
       presentPaywall,
       restorePurchases,
       reset,

@@ -2,8 +2,8 @@
 //
 // EASIEST PATH TO REVENUE:
 //   1. Create products in App Store Connect / Google Play:
-//        quaranr_annual  (annual, 3-day free trial)
-//        quaranr_monthly (monthly)
+//        sakina_annual  (annual, 3-day free trial)
+//        sakina_monthly (monthly)
 //   2. Create a RevenueCat project, add an entitlement "premium",
 //      attach both products, and create an offering "default".
 //   3. `npx expo install react-native-purchases`
@@ -22,29 +22,35 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 const isExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
-// Master switch for real billing. Flip to false to force the mock everywhere.
-export const REAL_BILLING_ENABLED = true;
+// Master switch for real billing. Currently OFF: real IAP isn't configured yet
+// (test key, no App Store products), so we keep the native RevenueCat SDK out of
+// the launch path and use the in-memory mock everywhere. Flip back to true once
+// a real `appl_` key + App Store products + a RevenueCat offering are set up.
+export const REAL_BILLING_ENABLED = false;
 export const USE_REAL_BILLING = REAL_BILLING_ENABLED && !isExpoGo;
 
 // Public (publishable) SDK keys are safe to ship in the client bundle.
-// Sourced from EXPO_PUBLIC_REVENUECAT_KEY when set, with the test-store key as
-// the fallback so a fresh checkout still talks to RevenueCat. A single
-// test-store key currently serves both platforms.
+// Sourced from EXPO_PUBLIC_REVENUECAT_KEY when set; falls back to the real Apple
+// App Store PUBLIC SDK key so cloud builds that miss the env var still talk to
+// real StoreKit (never the test store). Public SDK keys are safe to ship.
 const RC_KEY =
-  process.env.EXPO_PUBLIC_REVENUECAT_KEY || 'test_ekVSWcpqbpoAvVQUuleAjWstjot';
+  process.env.EXPO_PUBLIC_REVENUECAT_KEY || 'appl_OuBaLwIJumRrPzVkNzflskPOCYk';
 
 export const REVENUECAT = {
   iosApiKey: RC_KEY,
   androidApiKey: RC_KEY,
   // Must match the entitlement identifier configured in the RevenueCat dashboard.
-  entitlementId: 'Quaranr Pro',
+  entitlementId: 'Sakina Pro',
   offeringId: 'default',
 };
 
 // Display data — mirrors what the store would return. Single currency for clarity.
 export const PRODUCTS = {
   annual: {
-    id: 'quaranr_annual',
+    // Must match the App Store Connect / Play product identifier EXACTLY, and be
+    // attached to the RevenueCat "default" offering. Create the annual sub in
+    // App Store Connect with this exact Product ID (note the "quranr" spelling).
+    id: 'com.quranr.pro.annual',
     title: 'Yearly',
     priceString: '$29.99',
     price: 29.99,
@@ -54,7 +60,8 @@ export const PRODUCTS = {
     badge: 'BEST VALUE · 3-DAY FREE TRIAL',
   },
   monthly: {
-    id: 'quaranr_monthly',
+    // Matches the subscription you created in App Store Connect.
+    id: 'com.quranr.pro.monthly',
     title: 'Monthly',
     priceString: '$9.99',
     price: 9.99,

@@ -80,12 +80,40 @@ export async function getOfferings() {
 }
 
 // Returns { entitled: boolean }. Throws on a real, user-facing failure.
+// On misconfiguration it throws a SPECIFIC, on-device-visible message so the
+// exact RevenueCat gap (no current offering / product missing) is obvious.
 export async function purchase(plan) {
   if (USE_REAL_BILLING) {
     const sdk = await getRealSDK();
-    const offerings = await getOfferings();
-    const pkg = offerings[plan]?._pkg;
-    if (!pkg) throw new Error('Product unavailable. Please try again.');
+
+    let offerings;
+    try {
+      offerings = await sdk.getOfferings();
+    } catch (e) {
+      throw new Error('Could not load offerings from RevenueCat: ' + (e?.message || e));
+    }
+
+    const current = offerings.current;
+    if (!current) {
+      const all = Object.keys(offerings.all || {});
+      throw new Error(
+        'No "current" offering in RevenueCat. ' +
+          (all.length ? `Found offerings: ${all.join(', ')}. ` : 'No offerings exist. ') +
+          'Go to RevenueCat → Offerings and mark one as Current.'
+      );
+    }
+
+    const wantId = PRODUCTS[plan].id;
+    const pkg = current.availablePackages?.find((p) => p.product.identifier === wantId);
+    if (!pkg) {
+      const have = (current.availablePackages || []).map((p) => p.product.identifier);
+      throw new Error(
+        `Product "${wantId}" not found in offering "${current.identifier}". ` +
+          `Packages present: ${have.length ? have.join(', ') : 'none'}. ` +
+          'Add it as a Package and ensure StoreKit returns it (product Ready to Submit + .p8 key uploaded).'
+      );
+    }
+
     const { customerInfo } = await sdk.purchasePackage(pkg);
     return {
       entitled: !!customerInfo.entitlements.active[REVENUECAT.entitlementId],

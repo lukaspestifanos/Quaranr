@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sakina Icon</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0e1a; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+    #__bundler_loading { position: fixed; bottom: 20px; right: 20px; font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; color: #666; background: #fff; padding: 8px 14px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.12); z-index: 10000; }
+    #__bundler_thumbnail { position: fixed; inset: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #0a0e1a; z-index: 9999; }
+    #__bundler_thumbnail svg { width: 100%; height: 100%; object-fit: contain; }
+    #__bundler_placeholder { color: #999; font-size: 14px; }
+  </style>
+  <noscript>
+    <style>#__bundler_loading { display: none; }</style>
+    <div style="position:fixed;bottom:12px;left:12px;font:13px/1.4 -apple-system,BlinkMacSystemFont,sans-serif;color:#999;background:rgba(255,255,255,0.9);padding:6px 12px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:10000;">
+      This page requires JavaScript to display.
+    </div>
+  </noscript>
+</head>
+<body>
+  <div id="__bundler_thumbnail">
+    <svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1024" height="1024" fill="#0C1120"></rect>
+      <mask id="tm"><rect width="1024" height="1024" fill="black"></rect><circle cx="470" cy="528" r="290" fill="white"></circle><circle cx="612" cy="446" r="276" fill="black"></circle></mask>
+      <g mask="url(#tm)"><rect width="1024" height="1024" fill="#D9B97A"></rect></g>
+      <path d="M700,388 L714.6,425.1 L754.5,427.5 L723.6,452.7 L733.7,491.4 L700,470.2 L666.3,491.4 L676.4,452.7 L645.5,427.5 L685.4,425.1 Z" fill="#D9B97A"></path>
+    </svg>
+  </div>
+  <div id="__bundler_loading">Unpacking...</div>
+
+  <script>
+    
+document.addEventListener('DOMContentLoaded', async function() {
+  const loading = document.getElementById('__bundler_loading');
+  function setStatus(msg) { if (loading) loading.textContent = msg; }
+
+  // Error sink persists across replaceWith since it's on window, not the DOM.
+  window.addEventListener('error', function(e) {
+    var p = document.body || document.documentElement;
+    var d = document.getElementById('__bundler_err') || p.appendChild(document.createElement('div'));
+    d.id = '__bundler_err';
+    d.style.cssText = 'position:fixed;bottom:12px;left:12px;right:12px;font:12px/1.4 ui-monospace,monospace;background:#2a1215;color:#ff8a80;padding:10px 14px;border-radius:8px;border:1px solid #5c2b2e;z-index:99999;white-space:pre-wrap;max-height:40vh;overflow:auto';
+    d.textContent = (d.textContent ? d.textContent + String.fromCharCode(10) : '') +
+      '[bundle] ' + (e.message || e.type) +
+      (e.filename ? ' (' + e.filename.slice(0, 60) + ':' + e.lineno + ')' : '');
+  }, true);
+
+  try {
+    const manifestEl = document.querySelector('script[type="__bundler/manifest"]');
+    const templateEl = document.querySelector('script[type="__bundler/template"]');
+    if (!manifestEl || !templateEl) {
+      setStatus('Error: missing bundle data');
+      console.error('[bundler] Missing script tags — manifestEl:', !!manifestEl, 'templateEl:', !!templateEl);
+      return;
+    }
+
+    const manifest = JSON.parse(manifestEl.textContent);
+    let template = JSON.parse(templateEl.textContent);
+
+    const uuids = Object.keys(manifest);
+    setStatus('Unpacking ' + uuids.length + ' assets...');
+
+    const blobUrls = {};
+    await Promise.all(uuids.map(async (uuid) => {
+      const entry = manifest[uuid];
+      try {
+        const binaryStr = atob(entry.data);
+        const bytes = new Uint8Array(binaryStr.length);
+        for (let i = 0; i < binaryStr.length; i++) bytes[i] = binaryStr.charCodeAt(i);
+
+        let finalBytes = bytes;
+        if (entry.compressed) {
+          if (typeof DecompressionStream !== 'undefined') {
+            const ds = new DecompressionStream('gzip');
+            const writer = ds.writable.getWriter();
+            const reader = ds.readable.getReader();
+            writer.write(bytes);
+            writer.close();
+            const chunks = [];
+            let totalLen = 0;
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              chunks.push(value);
+              totalLen += value.length;
+            }
+            finalBytes = new Uint8Array(totalLen);
+            let offset = 0;
+            for (const chunk of chunks) { finalBytes.set(chunk, offset); offset += chunk.length; }
+          } else {
+            console.warn('DecompressionStream not available, asset ' + uuid + ' may not render');
+          }
+        }
+
+        blobUrls[uuid] = URL.createObjectURL(new Blob([finalBytes], { type: entry.mime }));
+      } catch (err) {
+        console.error('Failed to decode asset ' + uuid + ':', err);
+        blobUrls[uuid] = URL.createObjectURL(new Blob([], { type: entry.mime }));
+      }
+    }));
+
+    const extResEl = document.querySelector('script[type="__bundler/ext_resources"]');
+    const extResources = extResEl ? JSON.parse(extResEl.textContent) : [];
+    const resourceMap = {};
+    for (const entry of extResources) {
+      if (blobUrls[entry.uuid]) resourceMap[entry.id] = blobUrls[entry.uuid];
+    }
+
+    setStatus('Rendering...');
+    for (const uuid of uuids) template = template.split(uuid).join(blobUrls[uuid]);
+
+    // Strip integrity + crossorigin — blob URLs from a file:// document inherit
+    // a null origin, so crossorigin forces a CORS fetch that SRI then rejects.
+    // The manifest bytes are ours; SRI protects against CDN compromise, not this.
+    template = template.replace(/\s+integrity="[^"]*"/gi, '').replace(/\s+crossorigin="[^"]*"/gi, '');
+
+    const resourceScript = '<script>window.__resources = ' +
+      JSON.stringify(resourceMap).split('</' + 'script>').join('<\\/' + 'script>') +
+      ';</' + 'script>';
+    // Inject after <head> so the DOCTYPE stays first; prepending the script
+    // would push the parser into quirks mode. DOMParser always emits a <head>
+    // (synthesizing one if the source HTML omitted it) but may carry
+    // attributes through, so match the full opening tag. slice() rather than
+    // replace() keeps us clear of $-pattern substitution in resourceScript.
+    const headOpen = template.match(/<head[^>]*>/i);
+    if (headOpen) {
+      const i = headOpen.index + headOpen[0].length;
+      template = template.slice(0, i) + resourceScript + template.slice(i);
+    }
+
+    // Parse the template and swap the root element. Scripts inserted via
+    // DOMParser/replaceWith are inert per spec — re-create each with
+    // createElement so they execute, awaiting onload for src scripts to
+    // preserve ordering (React before ReactDOM before Babel before text/babel).
+    const doc = new DOMParser().parseFromString(template, 'text/html');
+    document.documentElement.replaceWith(doc.documentElement);
+    const dead = Array.from(document.scripts);
+    for (const old of dead) {
+      const s = document.createElement('script');
+      for (const a of old.attributes) s.setAttribute(a.name, a.value);
+      s.textContent = old.textContent;
+      // text/babel scripts with a src: fetch and inline. transformScriptTags
+      // does XHR against the src, but blob:null/ from a file:// origin is
+      // silently dropped. Inlining makes it a plain inline babel script,
+      // which transformScriptTags handles unconditionally.
+      if ((s.type === 'text/babel' || s.type === 'text/jsx') && s.src) {
+        const r = await fetch(s.src);
+        s.textContent = await r.text();
+        s.removeAttribute('src');
+      }
+      const p = s.src ? new Promise(function(r) { s.onload = s.onerror = r; }) : null;
+      old.replaceWith(s);
+      if (p) await p;
+    }
+    // Babel standalone auto-transforms type=text/babel on DOMContentLoaded,
+    // which fired before we swapped the document. Trigger manually if present.
+    if (window.Babel && typeof window.Babel.transformScriptTags === 'function') {
+      window.Babel.transformScriptTags();
+    }
+  } catch (err) {
+    setStatus('Error unpacking: ' + err.message);
+    console.error('Bundle unpack error:', err);
+  }
+});
+
+  </script>
+
+  <script type="__bundler/manifest">
+{}
+  </script>
+
+  <script type="__bundler/ext_resources">
+[]
+  </script>
+
+  <script type="__bundler/template">
+"<!DOCTYPE html>\n<html lang=\"en\"><head>\n<meta charset=\"UTF-8\">\n<title>Sakina Icon<\u002Ftitle>\n<style>\n  * { box-sizing: border-box; margin: 0; padding: 0; }\n  html, body { width: 100%; height: 100%; background: #0a0e1a; display: flex; align-items: center; justify-content: center; }\n  .icon {\n    width: 1024px; height: 1024px; overflow: hidden;\n    background: radial-gradient(62% 60% at 50% 44%, #1B2442 0%, #0C1120 56%, #070A12 100%);\n  }\n  @media (max-width: 1080px), (max-height: 1080px) {\n    .icon { width: 90vmin; height: 90vmin; }\n  }\n<\u002Fstyle>\n<\u002Fhead>\n<body>\n  <div class=\"icon\">\n    <svg width=\"100%\" height=\"100%\" viewBox=\"0 0 1024 1024\" xmlns=\"http://www.w3.org/2000/svg\">\n      <defs>\n        <linearGradient id=\"gC\" x1=\"0.15\" y1=\"0.05\" x2=\"0.85\" y2=\"0.95\">\n          <stop offset=\"0\" stop-color=\"#EBD29B\"><\u002Fstop><stop offset=\"0.5\" stop-color=\"#D9B97A\"><\u002Fstop><stop offset=\"1\" stop-color=\"#C2974F\"><\u002Fstop>\n        <\u002FlinearGradient>\n        <radialGradient id=\"glowC\" cx=\"0.47\" cy=\"0.45\" r=\"0.46\">\n          <stop offset=\"0\" stop-color=\"#D9B97A\" stop-opacity=\"0.34\"><\u002Fstop><stop offset=\"1\" stop-color=\"#D9B97A\" stop-opacity=\"0\"><\u002Fstop>\n        <\u002FradialGradient>\n        <mask id=\"mC\">\n          <rect width=\"1024\" height=\"1024\" fill=\"black\"><\u002Frect>\n          <circle cx=\"470\" cy=\"528\" r=\"290\" fill=\"white\"><\u002Fcircle>\n          <circle cx=\"612\" cy=\"446\" r=\"276\" fill=\"black\"><\u002Fcircle>\n        <\u002Fmask>\n      <\u002Fdefs>\n      <rect width=\"1024\" height=\"1024\" fill=\"url(#glowC)\"><\u002Frect>\n      <circle cx=\"742\" cy=\"300\" r=\"7\" fill=\"#D9B97A\" opacity=\"0.85\"><\u002Fcircle>\n      <circle cx=\"800\" cy=\"420\" r=\"4.5\" fill=\"#D9B97A\" opacity=\"0.6\"><\u002Fcircle>\n      <circle cx=\"690\" cy=\"250\" r=\"4\" fill=\"#E7D8B6\" opacity=\"0.55\"><\u002Fcircle>\n      <circle cx=\"300\" cy=\"300\" r=\"5\" fill=\"#D9B97A\" opacity=\"0.5\"><\u002Fcircle>\n      <circle cx=\"250\" cy=\"470\" r=\"3.5\" fill=\"#D9B97A\" opacity=\"0.45\"><\u002Fcircle>\n      <circle cx=\"780\" cy=\"650\" r=\"4\" fill=\"#D9B97A\" opacity=\"0.4\"><\u002Fcircle>\n      <g mask=\"url(#mC)\"><rect width=\"1024\" height=\"1024\" fill=\"url(#gC)\"><\u002Frect><\u002Fg>\n      <path d=\"M700,388 L714.6,425.1 L754.5,427.5 L723.6,452.7 L733.7,491.4 L700,470.2 L666.3,491.4 L676.4,452.7 L645.5,427.5 L685.4,425.1 Z\" fill=\"url(#gC)\"><\u002Fpath>\n    <\u002Fsvg>\n  <\u002Fdiv>\n  \n\n\n<\u002Fbody><\u002Fhtml>"
+  </script>
+</body>
+</html>

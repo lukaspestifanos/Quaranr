@@ -5,9 +5,11 @@ import * as Notifications from 'expo-notifications';
 // (repeating every day) plus a weekly Jumu'ah reminder — re-armed on every app
 // launch so they never silently lapse.
 
-const DAILY = Notifications.SchedulableTriggerInputTypes.DAILY;
-const WEEKLY = Notifications.SchedulableTriggerInputTypes.WEEKLY;
 const CHANNEL = 'reminders';
+
+// Resolve trigger-type enums lazily (inside functions) rather than at module
+// load, so importing this file can never throw during app startup.
+const triggerTypes = () => Notifications.SchedulableTriggerInputTypes || {};
 
 // Show notifications even when the app is foregrounded.
 export function setupNotificationHandler() {
@@ -66,6 +68,7 @@ export async function scheduleReminders(opts = {}) {
 
     await Notifications.cancelAllScheduledNotificationsAsync();
 
+    const { DAILY, WEEKLY } = triggerTypes();
     const wind = windDownTime(opts.winddown);
     const nudges = DAILY_NUDGES.map((n) => (n.id === 'night' ? { ...n, h: wind.h, m: wind.m } : n));
 

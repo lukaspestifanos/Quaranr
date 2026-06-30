@@ -1,7 +1,7 @@
 // Gesture handler must be imported before anything else.
 import 'react-native-gesture-handler';
 import React, { useCallback, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -29,6 +29,7 @@ import PlanReveal from './src/screens/PlanReveal';
 import Rate from './src/screens/Rate';
 import Signature from './src/screens/Signature';
 import Notification from './src/screens/Notification';
+import Paywall from './src/screens/Paywall';
 import Hub from './src/app/Hub';
 
 const SCREENS = {
@@ -60,9 +61,9 @@ const FALLBACK_COPY = {
   },
   rate: {
     eyebrow: 'One small favor',
-    title: 'Enjoying Quaranr so far?',
+    title: 'Enjoying Sakina so far?',
     body: 'A rating helps more Muslims find their way back. It takes a moment.',
-    cta: 'Rate Quaranr',
+    cta: 'Rate Sakina',
   },
   signature: {
     eyebrow: 'Your commitment',
@@ -98,6 +99,7 @@ function Placeholder({ step, progress, onNext, onBack }) {
 function Onboarding() {
   const app = useApp();
   const [i, setI] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
   const step = STEPS[i];
   const progress = (i + 1) / TOTAL_STEPS;
 
@@ -110,14 +112,10 @@ function Onboarding() {
       // Persist any answer this step produced (questions / pickers).
       if (value !== undefined && step?.id) app.setAnswer(step.id, value);
 
-      // Final step → present the paywall, then enter the app.
+      // Final step → reveal the hard paywall (no close). Entering the app only
+      // happens once the purchase/restore succeeds, via Paywall's onSuccess.
       if (step?.final) {
-        try {
-          await app.presentPaywall();
-        } catch (e) {
-          // user cancelled / store error — still let them in (trial flow)
-        }
-        app.finishOnboarding();
+        setShowPaywall(true);
         return;
       }
 
@@ -131,6 +129,11 @@ function Onboarding() {
   );
 
   const onBack = useCallback(() => setI((prev) => Math.max(0, prev - 1)), []);
+
+  // Hard paywall is the terminal screen of onboarding.
+  if (showPaywall) {
+    return <Paywall onSuccess={() => app.finishOnboarding()} />;
+  }
 
   const Comp = SCREENS[step.type] || Placeholder;
   return (
@@ -163,14 +166,43 @@ function Gate() {
   return onboarded ? <Hub /> : <Onboarding />;
 }
 
+// Catches any render error so a release build shows the message on screen
+// instead of silently closing — invaluable for diagnosing TestFlight crashes.
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <View style={{ flex: 1, backgroundColor: colors.bg, padding: 24, justifyContent: 'center' }}>
+          <Text style={{ color: colors.gold, fontSize: 18, fontWeight: '700', marginBottom: 12 }}>
+            Something went wrong
+          </Text>
+          <Text style={{ color: '#F4F1E8', fontSize: 13 }} selectable>
+            {String(this.state.error?.message || this.state.error)}
+          </Text>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <AppProvider>
-          <StatusBar style="light" />
-          <Gate />
-        </AppProvider>
+        <ErrorBoundary>
+          <AppProvider>
+            <StatusBar style="light" />
+            <Gate />
+          </AppProvider>
+        </ErrorBoundary>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

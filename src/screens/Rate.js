@@ -43,7 +43,7 @@ export default function Rate({ progress, onNext, onBack }) {
       onBack={onBack}
       footer={
         <PrimaryButton
-          label={rated ? 'Continue' : 'Rate Quaranr'}
+          label={rated ? 'Continue' : 'Rate Sakina'}
           variant="gold"
           onPress={commit}
         />
@@ -51,7 +51,7 @@ export default function Rate({ progress, onNext, onBack }) {
     >
       <View style={styles.head}>
         <Eyebrow>Help us grow</Eyebrow>
-        <H1 center>Enjoying Quaranr?</H1>
+        <H1 center>Enjoying Sakina?</H1>
         <Lead center style={{ maxWidth: 320 }}>
           A quick rating helps more Muslims find their way back to a steady, calm prayer habit.
         </Lead>

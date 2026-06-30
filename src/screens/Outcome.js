@@ -168,7 +168,16 @@ function TrialOutcome({ step }) {
 
 const styles = StyleSheet.create({
   centerBlock: { alignItems: 'center', flex: 1, justifyContent: 'center' },
-  ringNum: { ...font.display, fontSize: 46, color: colors.text },
+  // lineHeight must be >= fontSize or the glyph tops clip. font.display ships a
+  // 38 lineHeight for its 32px size; at 46px we need to grow it to match.
+  ringNum: {
+    ...font.display,
+    fontSize: 46,
+    lineHeight: 54,
+    color: colors.text,
+    textAlign: 'center',
+    includeFontPadding: false,
+  },
   ringLabel: { ...font.caption, color: colors.textDim, marginTop: 2 },
 
   chart: {

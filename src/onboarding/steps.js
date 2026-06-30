@@ -58,21 +58,13 @@ export const STEPS = [
   {
     id: 'hook',
     type: 'talk',
-    eyebrow: 'Welcome to Quaranr',
+    eyebrow: 'Welcome to Sakina',
     title: 'Do you have 1 minute\nfor God?',
     body: 'Just one. That’s how the journey back begins.',
     cta: 'Yes, I do',
     gradient: 'dawn',
   },
-  // 2 — reframe
-  {
-    id: 'reframe',
-    type: 'talk',
-    title: 'The average person scrolls\nfor 2 hours a day.',
-    body: 'We’ll start with one minute for your Lord — and build from there.',
-    cta: 'I’m ready',
-  },
-  // 3 — streak immediately
+  // streak immediately
   { id: 'streak', type: 'streak' },
   // 4 — demo / see the product
   { id: 'demo', type: 'demo' },
@@ -81,7 +73,7 @@ export const STEPS = [
     id: 'goal',
     type: 'question',
     eyebrow: 'Personalize',
-    title: 'What do you want from Quaranr?',
+    title: 'What do you want from Sakina?',
     body: 'Choose all that speak to you.',
     select: 'multi',
     options: [
@@ -92,15 +84,7 @@ export const STEPS = [
       { value: 'closer', label: 'Feel closer to Allah', emoji: '✨' },
     ],
   },
-  // 6 — affirmation, talks to you
-  {
-    id: 'affirm-goal',
-    type: 'talk',
-    title: 'You’re not alone in this.',
-    body: 'Over 1.2 million people started exactly where you are right now.',
-    cta: 'Continue',
-  },
-  // 7 — relationship
+  // relationship
   {
     id: 'relationship',
     type: 'question',
@@ -142,28 +126,7 @@ export const STEPS = [
       { value: 'knowledge', label: 'I’m unsure how / what to recite', emoji: '❓' },
     ],
   },
-  // 10 — reassurance
-  {
-    id: 'affirm-struggle',
-    type: 'talk',
-    title: 'Every one of those\nhas a fix.',
-    body: 'And we’ve built each one into your plan. Keep going.',
-    cta: 'Continue',
-  },
-  // 11 — for whom
-  {
-    id: 'audience',
-    type: 'question',
-    title: 'Who are you building\nthis practice for?',
-    select: 'single',
-    options: [
-      { value: 'me', label: 'Just me', emoji: '🧎' },
-      { value: 'family', label: 'Me and my family', emoji: '👨‍👩‍👧' },
-      { value: 'kids', label: 'Helping my kids learn', emoji: '🧒' },
-      { value: 'revert', label: 'I’m new to Islam', emoji: '🌅' },
-    ],
-  },
-  // 12 — age (the "weight/activity" deep-personalization beat)
+  // age — deep-personalization beat
   {
     id: 'age',
     type: 'question',
@@ -178,20 +141,7 @@ export const STEPS = [
       { value: '50+', label: '50+' },
     ],
   },
-  // 13 — Quran experience
-  {
-    id: 'experience',
-    type: 'question',
-    title: 'How much Quran do\nyou already know?',
-    select: 'single',
-    options: [
-      { value: 'none', label: 'I’m just beginning', emoji: '🌱' },
-      { value: 'short', label: 'A few short surahs', emoji: '📗' },
-      { value: 'juz', label: 'A juz or more', emoji: '📘' },
-      { value: 'hafiz', label: 'Large portions / hafiz', emoji: '📚' },
-    ],
-  },
-  // 14 — reciter
+  // reciter
   {
     id: 'reciter',
     type: 'question',
@@ -240,33 +190,9 @@ export const STEPS = [
     title: 'In 30 days, you could pray\n93% of your salah on time.',
     body: 'Based on people with your answers who stay 7 days.',
   },
-  // 18 — outcome graph
-  {
-    id: 'outcome-graph',
-    type: 'outcome',
-    variant: 'graph',
-    title: 'Consistency compounds.',
-    body: 'Most users go from scattered to steady within their first two weeks.',
-  },
-  // 19 — reviews #1
+  // reviews #1
   { id: 'reviews1', type: 'reviews', set: 'set1', title: 'You’re in good company' },
-  // 20 — how did you hear
-  {
-    id: 'howheard',
-    type: 'howheard',
-    title: 'How did you hear about us?',
-    options: [
-      { value: 'tiktok', label: 'TikTok', emoji: '🎵' },
-      { value: 'instagram', label: 'Instagram', emoji: '📸' },
-      { value: 'friend', label: 'Friend or family', emoji: '🫶' },
-      { value: 'masjid', label: 'My masjid / imam', emoji: '🕌' },
-      { value: 'appstore', label: 'App Store search', emoji: '🔎' },
-      { value: 'youtube', label: 'YouTube', emoji: '▶️' },
-    ],
-  },
-  // 21 — referral code
-  { id: 'referral', type: 'referral' },
-  // 22 — which prayers to remind
+  // which prayers to remind
   {
     id: 'reminderTimes',
     type: 'question',
@@ -295,41 +221,15 @@ export const STEPS = [
   { id: 'planreveal', type: 'planreveal' },
   // 26 — first usage hype moment
   { id: 'firstuse', type: 'firstuse' },
-  // 27 — how did that feel (micro)
-  {
-    id: 'feel',
-    type: 'question',
-    title: 'How did that feel?',
-    select: 'single',
-    options: [
-      { value: 'peaceful', label: 'Peaceful', emoji: '🤍' },
-      { value: 'emotional', label: 'Emotional', emoji: '🥹' },
-      { value: 'focused', label: 'Focused', emoji: '🎯' },
-      { value: 'more', label: 'I want more', emoji: '🔥' },
-    ],
-  },
-  // 28 — rate us mid-flow
+  // rate us mid-flow
   { id: 'rate', type: 'rate' },
-  // 29 — reviews #2
-  { id: 'reviews2', type: 'reviews', set: 'set2', title: 'Loved by 1.2M+ Muslims' },
-  // 30 — signature commitment
+  // signature commitment
   { id: 'signature', type: 'signature' },
   // 31 — notification permission
   { id: 'notification', type: 'notification' },
-  // 32 — one last thing
-  {
-    id: 'almost',
-    type: 'talk',
-    eyebrow: 'Almost there',
-    title: 'One last thing\nbefore we begin.',
-    body: 'See what’s waiting for you.',
-    cta: 'Continue',
-  },
-  // 33 — reviews #3 right before paywall
+  // reviews #3 right before paywall
   { id: 'reviews3', type: 'reviews', set: 'set3', title: 'Don’t just take our word for it' },
-  // 34 — personalized recap
-  { id: 'recap', type: 'outcome', variant: 'recap', title: 'Your plan is personalized' },
-  // 35 — trial explainer
+  // trial explainer
   { id: 'trial', type: 'outcome', variant: 'trial', title: 'How your free trial works' },
   // 36 — final hype → paywall
   {

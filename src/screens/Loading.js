@@ -32,40 +32,40 @@ export default function Loading({ onNext }) {
   }, []);
 
   return (
-    <Screen scroll={false} gradient="dawn">
-      <View style={styles.center}>
-        <ProgressRing size={150} stroke={12} progress={1} duration={3600}>
-          <AnimatedNumber value={100} suffix="%" duration={3600} style={styles.pct} />
-        </ProgressRing>
-        <Text style={styles.title}>Building your prayer plan…</Text>
-        <Text style={styles.sub}>Tailored to everything you told us</Text>
+    <Screen gradient="dawn" contentStyle={styles.content}>
+      <ProgressRing size={140} stroke={12} progress={1} duration={3600}>
+        <AnimatedNumber value={100} suffix="%" duration={3600} style={styles.pct} />
+      </ProgressRing>
+      <Text style={styles.title}>Building your prayer plan…</Text>
+      <Text style={styles.sub}>Tailored to everything you told us</Text>
 
-        <View style={styles.tasks}>
-          {TASKS.map((t, i) => {
-            const isDone = i < done;
-            const isActive = i === done;
-            return (
-              <Animated.View key={t} entering={FadeIn.delay(i * 120)} style={styles.taskRow}>
-                <View style={[styles.taskDot, isDone && styles.taskDotDone]}>
-                  {isDone ? (
-                    <Glyph name="check" size={14} color={'#1A1304'} />
-                  ) : isActive ? (
-                    <ActivityIndicator size="small" color={colors.gold} />
-                  ) : null}
-                </View>
-                <Text style={[styles.taskText, isDone && { color: colors.text }]}>{t}</Text>
-              </Animated.View>
-            );
-          })}
-        </View>
+      <View style={styles.tasks}>
+        {TASKS.map((t, i) => {
+          const isDone = i < done;
+          const isActive = i === done;
+          return (
+            <Animated.View key={t} entering={FadeIn.delay(i * 120)} style={styles.taskRow}>
+              <View style={[styles.taskDot, isDone && styles.taskDotDone]}>
+                {isDone ? (
+                  <Glyph name="check" size={14} color={'#1A1304'} />
+                ) : isActive ? (
+                  <ActivityIndicator size="small" color={colors.gold} />
+                ) : null}
+              </View>
+              <Text style={[styles.taskText, isDone && { color: colors.text }]}>{t}</Text>
+            </Animated.View>
+          );
+        })}
       </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  pct: { ...font.h1, color: colors.text },
+  // Center when it fits, scroll when it doesn't — so the ring/percent is never
+  // clipped off the top on shorter screens.
+  content: { alignItems: 'center', justifyContent: 'center', paddingVertical: space(8) },
+  pct: { ...font.h1, color: colors.text, textAlign: 'center', includeFontPadding: false },
   title: { ...font.h2, color: colors.text, marginTop: space(7), textAlign: 'center' },
   sub: { ...font.caption, color: colors.textDim, marginTop: space(2) },
   tasks: { marginTop: space(8), alignSelf: 'stretch', gap: space(3.5), paddingHorizontal: space(2) },

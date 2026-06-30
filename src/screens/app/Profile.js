@@ -39,7 +39,7 @@ export default function Profile() {
         const n = await scheduleReminders({ winddown: app.answers?.winddown });
         Alert.alert('Reminders on', `You’ll get ${n} gentle nudges scheduled to keep your streak alive.`);
       } else {
-        Alert.alert('Permission needed', 'Enable notifications for Quaranr in Settings to get reminders.');
+        Alert.alert('Permission needed', 'Enable notifications for Sakina in Settings to get reminders.');
       }
     } finally { setBusy(false); }
   };
@@ -62,7 +62,7 @@ export default function Profile() {
           <Text style={styles.avatarText}>{(app.name || 'You').slice(0, 1).toUpperCase()}</Text>
         </LinearGradient>
         <Text style={styles.name}>{app.name || 'Friend'}</Text>
-        <Text style={styles.sub}>{app.entitled ? 'Quaranr Pro' : 'Free plan'}</Text>
+        <Text style={styles.sub}>{app.entitled ? 'Sakina Pro' : 'Free plan'}</Text>
       </View>
 
       <View style={styles.statsRow}>
@@ -76,7 +76,7 @@ export default function Profile() {
           <LinearGradient colors={['#E6C27A', '#C99B47']} style={StyleSheet.absoluteFill} />
           <Glyph name="sparkle" size={22} color={'#1A1304'} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.proTitle}>Unlock Quaranr Pro</Text>
+            <Text style={styles.proTitle}>Unlock Sakina Pro</Text>
             <Text style={styles.proSub}>Your full plan, every reciter, all surahs.</Text>
           </View>
           <Glyph name="lock" size={20} color={'#1A1304'} />
@@ -102,7 +102,7 @@ export default function Profile() {
       <ActionRow icon="heart" label="Restore purchases" onPress={restore} disabled={busy} />
       <ActionRow icon="lock" label="Reset app" onPress={confirmReset} danger />
 
-      <Text style={styles.footer}>Quaranr · v1.0.0</Text>
+      <Text style={styles.footer}>Sakina · v1.0.0</Text>
     </Screen>
   );
 }

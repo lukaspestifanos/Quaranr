@@ -1,4 +1,4 @@
-// Quaranr design system — premium, calm, "clean not cute". No mascot.
+// Sakina design system — premium, calm, "clean not cute". No mascot.
 // Midnight navy canvas, warm gold accent, emerald for "growth/streak".
 
 export const colors = {

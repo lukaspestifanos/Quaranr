@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Single source of truth for everything we persist locally.
-const KEY = 'quaranr.state.v1';
+const KEY = 'sakina.state.v1';
 
 export const defaultState = {
   onboarded: false,
