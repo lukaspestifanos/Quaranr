@@ -19,8 +19,12 @@ import { useApp } from '../state/AppContext';
 import { PRODUCTS } from '../monetization/config';
 import { colors, gradients, font, space, radius, shadow } from '../theme';
 
-const TERMS_URL = 'https://sakina.app/terms';
-const PRIVACY_URL = 'https://sakina.app/privacy';
+// Apple requires FUNCTIONAL links here (Guideline 3.1.2(c)). Terms uses
+// Apple's standard EULA; Privacy is our GitHub Pages policy. If these hosts
+// ever change, update the App Store metadata links too.
+const TERMS_URL =
+  'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const PRIVACY_URL = 'https://lukaspestifanos.github.io/Quaranr/privacy.html';
 
 const BENEFITS = [
   { icon: 'moon', text: 'Sleep to Quran every night' },

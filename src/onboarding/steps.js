@@ -221,8 +221,9 @@ export const STEPS = [
   { id: 'planreveal', type: 'planreveal' },
   // 26 — first usage hype moment
   { id: 'firstuse', type: 'firstuse' },
-  // rate us mid-flow
-  { id: 'rate', type: 'rate' },
+  // NOTE: the "rate us" step was removed from onboarding — Apple rejected it
+  // under Guideline 5.6.3 (no rating requests during onboarding/first launch).
+  // Ask for a rating later, after real engagement (e.g. a multi-day streak).
   // signature commitment
   { id: 'signature', type: 'signature' },
   // 31 — notification permission

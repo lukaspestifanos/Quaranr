@@ -22,11 +22,11 @@ import Constants, { ExecutionEnvironment } from 'expo-constants';
 const isExpoGo =
   Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 
-// Master switch for real billing. Currently OFF: real IAP isn't configured yet
-// (test key, no App Store products), so we keep the native RevenueCat SDK out of
-// the launch path and use the in-memory mock everywhere. Flip back to true once
-// a real `appl_` key + App Store products + a RevenueCat offering are set up.
-export const REAL_BILLING_ENABLED = false;
+// Master switch for real billing. ON: purchases go through RevenueCat →
+// StoreKit. Apple rejected build 13 under 2.1(b) because this was false and
+// the mock "granted membership without initiating the in-app purchase
+// process" — never ship a store build with this off.
+export const REAL_BILLING_ENABLED = true;
 export const USE_REAL_BILLING = REAL_BILLING_ENABLED && !isExpoGo;
 
 // Public (publishable) SDK keys are safe to ship in the client bundle.

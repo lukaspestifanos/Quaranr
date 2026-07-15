@@ -28,12 +28,18 @@ const HEIGHTS = Array.from({ length: BARS }, (_, i) =>
   0.35 + Math.abs(Math.sin(i * 0.7) * 0.55) + (i % 3 === 0 ? 0.12 : 0)
 );
 
-// Play through the iOS silent switch — recitation should be heard. Set once.
+// Play through the iOS silent switch AND keep playing when the app is
+// backgrounded / the screen locks — this is a sleep app, recitation must
+// continue after the phone is set down. shouldPlayInBackground pairs with the
+// UIBackgroundModes "audio" entitlement in app.json. Set once.
 let audioModeSet = false;
 function ensureAudioMode() {
   if (audioModeSet) return;
   audioModeSet = true;
-  setAudioModeAsync({ playsInSilentMode: true }).catch(() => {});
+  setAudioModeAsync({
+    playsInSilentMode: true,
+    shouldPlayInBackground: true,
+  }).catch(() => {});
 }
 
 export default function WaveformPlayer({
