@@ -36,6 +36,24 @@ export async function initBilling() {
   }
 }
 
+// True when this CustomerInfo grants access. Checks the configured entitlement
+// first, then falls back to ANY active entitlement and finally to an active
+// subscription on one of our products — so a dashboard gap (entitlement not
+// attached to a product, or renamed) can never lock out a paying customer.
+// Apple rejected build 15 under 2.1(b) because the strict check returned false
+// after a completed purchase and the paywall silently stayed up.
+function hasAccess(info) {
+  if (!info) return false;
+  const active = info.entitlements?.active || {};
+  if (active[REVENUECAT.entitlementId]) return true;
+  if (Object.keys(active).length > 0) return true; // single-tier app: any entitlement unlocks
+  const ourIds = Object.values(PRODUCTS).map((p) => p.id);
+  // iOS ids come back bare; Android as "productId:basePlanId" — compare the prefix.
+  return (info.activeSubscriptions || []).some((s) =>
+    ourIds.includes(String(s).split(':')[0])
+  );
+}
+
 // Reads the current entitlement straight from RevenueCat (or the cache).
 // Returns { entitled: boolean }. Never throws — call it on launch to hydrate.
 export async function getEntitlement() {
@@ -43,9 +61,7 @@ export async function getEntitlement() {
     try {
       const sdk = await getRealSDK();
       const info = await sdk.getCustomerInfo();
-      return {
-        entitled: !!info.entitlements.active[REVENUECAT.entitlementId],
-      };
+      return { entitled: hasAccess(info) };
     } catch (e) {
       return { entitled: false };
     }
@@ -114,10 +130,22 @@ export async function purchase(plan) {
       );
     }
 
+    // purchasePackage throws on cancel/failure. If it RESOLVES, Apple has
+    // charged (or started the trial for) the customer — so the answer is
+    // unconditionally "entitled". Never gate a completed payment on the
+    // RevenueCat entitlement flag: a dashboard misconfiguration would strand
+    // a paying user on the paywall (App Review rejection 2.1(b), build 15).
     const { customerInfo } = await sdk.purchasePackage(pkg);
-    return {
-      entitled: !!customerInfo.entitlements.active[REVENUECAT.entitlementId],
-    };
+    if (!hasAccess(customerInfo)) {
+      // Purchase went through but RevenueCat shows no entitlement — log it
+      // loudly so it shows in debug logs, but still unlock the app.
+      console.warn(
+        `[billing] Purchase of ${wantId} succeeded but entitlement ` +
+          `"${REVENUECAT.entitlementId}" is not active. Check that the ` +
+          'entitlement is attached to this product in RevenueCat.'
+      );
+    }
+    return { entitled: true };
   }
   // Mock: simulate the App Store sheet + trial start.
   await delay(1100);
@@ -165,7 +193,7 @@ export async function restore() {
   if (USE_REAL_BILLING) {
     const sdk = await getRealSDK();
     const info = await sdk.restorePurchases();
-    return { entitled: !!info.entitlements.active[REVENUECAT.entitlementId] };
+    return { entitled: hasAccess(info) };
   }
   await delay(700);
   return { entitled: false };

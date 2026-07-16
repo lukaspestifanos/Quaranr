@@ -71,11 +71,13 @@ export default function Paywall({ onSuccess }) {
     if (busy) return;
     setBusy(true);
     try {
-      const { entitled } = await app.buy(plan);
-      if (entitled) {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        onSuccess && onSuccess();
-      }
+      // buy() only resolves when the store confirmed the purchase (it throws
+      // on cancel/failure), so ALWAYS advance here. Build 15 was rejected
+      // under 2.1(b) because this was gated on the entitlement flag and a
+      // completed purchase left the reviewer stuck on this screen.
+      await app.buy(plan);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      onSuccess && onSuccess();
     } catch (e) {
       if (!e?.userCancelled) {
         Alert.alert('Purchase failed', e?.message || 'Please try again.');
