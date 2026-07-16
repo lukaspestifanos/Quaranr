@@ -41,7 +41,9 @@ export const REVENUECAT = {
   androidApiKey: RC_KEY,
   // Must match the entitlement identifier configured in the RevenueCat dashboard.
   entitlementId: 'Sakina Pro',
-  offeringId: 'default',
+  // Informational only — the app always uses offerings.current. This is the
+  // offering marked "Current" in the RevenueCat dashboard.
+  offeringId: 'sakina-pro',
 };
 
 // Display data — mirrors what the store would return. Single currency for clarity.
