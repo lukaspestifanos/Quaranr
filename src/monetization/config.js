@@ -39,8 +39,11 @@ const RC_KEY =
 export const REVENUECAT = {
   iosApiKey: RC_KEY,
   androidApiKey: RC_KEY,
-  // Must match the entitlement identifier configured in the RevenueCat dashboard.
-  entitlementId: 'Sakina Pro',
+  // Must match the entitlement IDENTIFIER in the RevenueCat dashboard exactly.
+  // The dashboard entitlement is "Quaranr Pro" (created before the app was
+  // renamed to Sakina) — the previous value 'Sakina Pro' never matched, which
+  // is why a completed purchase didn't unlock the app (2.1(b), build 15).
+  entitlementId: 'Quaranr Pro',
   // Informational only — the app always uses offerings.current. This is the
   // offering marked "Current" in the RevenueCat dashboard.
   offeringId: 'sakina-pro',
