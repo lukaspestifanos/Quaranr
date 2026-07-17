@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.quaranr.app",
       "buildNumber": "3",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["audio"]
       }
     },
     "android": {
@@ -43,8 +44,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": false,
-          "enableBackgroundPlayback": true
+          "microphonePermission": false
         }
       ]
     ],
